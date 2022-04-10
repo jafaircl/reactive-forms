@@ -1,3 +1,4 @@
+import { Validators } from '@angular/forms';
 import { expectTypeOf } from 'expect-type';
 import { Observable, of, Subject, Subscription } from 'rxjs';
 import { FormControl, FormGroup } from '..';
@@ -474,5 +475,21 @@ describe('FormArray Functionality', () => {
       { type: 'Jedi', name: 'Obi-Wan' },
       { type: 'Jedi', name: 'Windu' },
     ]);
+  });
+
+  it('should clone', () => {
+    const control = new FormArray([new FormControl(1)], {
+      asyncValidators: [async () => null],
+      updateOn: 'blur',
+      validators: [Validators.required],
+    });
+    const clone = control.clone();
+    expect(clone).not.toEqual(control);
+    expect(clone.value).toEqual(control.value);
+    expect(clone.asyncValidator).toEqual(control.asyncValidator);
+    expect(clone.updateOn).toEqual(control.updateOn);
+    expect(clone.validator).toEqual(control.validator);
+    clone.patchValue([2]);
+    expect(clone.value).not.toEqual(control.value);
   });
 });

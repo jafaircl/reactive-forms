@@ -1,6 +1,7 @@
 import { AbstractControl, ValidationErrors } from '@angular/forms';
 import { defer, merge, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
+import { ControlsOf, FormArray, FormControl, FormGroup } from '..';
 
 export function selectControlValue$<T, R>(
   control: any,
@@ -134,5 +135,58 @@ export function controlErrorChanges$(
 export function markAllDirty(control: AbstractControl): void {
   control.markAsDirty({ onlySelf: true });
 
-  (control as any)._forEachChild((control: any) => control.markAllAsDirty?.() || control.markAsDirty({ onlySelf: true }));
+  (control as any)._forEachChild(
+    (control: any) =>
+      control.markAllAsDirty?.() || control.markAsDirty({ onlySelf: true })
+  );
+}
+
+export function cloneAbstractControl<
+  T,
+  Control extends AbstractControl = T extends Record<string, any>
+    ? FormGroup<ControlsOf<T>>
+    : T extends []
+    ? FormArray<ControlsOf<T>>
+    : FormControl<T>
+>(control: Control): Control {
+  if (control instanceof FormArray) {
+    return cloneFormArray(control) as unknown as Control;
+  }
+  if (control instanceof FormGroup) {
+    return cloneFormGroup(control) as unknown as Control;
+  }
+  return cloneFormControl(
+    control as unknown as FormControl<T>
+  ) as unknown as Control;
+}
+
+export function cloneFormArray<T>(control: FormArray<T>): FormArray<T> {
+  return new FormArray(
+    control.controls.map((ctrl) => cloneAbstractControl(ctrl)),
+    {
+      asyncValidators: control.asyncValidator,
+      validators: control.validator,
+      updateOn: control.updateOn,
+    }
+  ) as FormArray<T>;
+}
+
+export function cloneFormControl<T>(control: FormControl<T>): FormControl<T> {
+  return new FormControl(control.value, {
+    asyncValidators: control.asyncValidator,
+    validators: control.validator,
+    updateOn: control.updateOn,
+  });
+}
+
+export function cloneFormGroup<T>(control: FormGroup<T>): FormGroup<T> {
+  const controls: Record<string, any> = {};
+  for (const [key, ctrl] of Object.entries(control.controls)) {
+    controls[key] = cloneAbstractControl(ctrl);
+  }
+  return new FormGroup<T>(controls as T, {
+    asyncValidators: control.asyncValidator,
+    updateOn: control.updateOn,
+    validators: control.validator,
+  });
 }

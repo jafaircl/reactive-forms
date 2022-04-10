@@ -18,15 +18,16 @@ import {
   disableControl,
   enableControl,
   markAllDirty,
+  cloneAbstractControl,
 } from './core';
 import { DeepPartial } from './types';
 
 export class FormArray<
   T,
   Control extends AbstractControl = T extends Record<any, any>
-  ? FormGroup<ControlsOf<T>>
-  : FormControl<T>
-  > extends NgFormArray {
+    ? FormGroup<ControlsOf<T>>
+    : FormControl<T>
+> extends NgFormArray {
   readonly value!: T[];
   readonly valueChanges!: Observable<T[]>;
 
@@ -254,5 +255,9 @@ export class FormArray<
     path?: Parameters<AbstractControl['hasError']>[1]
   ): boolean {
     return hasErrorAnd('dirty', this, error, path);
+  }
+
+  clone(): FormArray<T, Control> {
+    return cloneAbstractControl(this);
   }
 }

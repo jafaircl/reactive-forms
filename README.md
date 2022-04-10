@@ -402,6 +402,19 @@ const group = new FormGroup(...);
 group.removeError('customError');
 ```
 
+### `clone`
+
+Make an exact copy of a control.
+
+```ts
+import { FormGroup } from '@ngneat/reactive-forms';
+
+const control = new FormControl(1);
+const copy = group.clone()
+copy.setValue(2)
+copy.value !== control.value // true
+```
+
 ### FormArray methods
 
 ### remove()

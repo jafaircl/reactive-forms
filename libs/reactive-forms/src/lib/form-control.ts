@@ -16,9 +16,9 @@ import {
   removeError,
   hasErrorAnd,
   controlErrorChanges$,
+  cloneAbstractControl,
 } from './core';
 import { BoxedValue } from './types';
-
 
 export class FormControl<T> extends NgFormControl {
   readonly value!: T;
@@ -206,5 +206,9 @@ export class FormControl<T> extends NgFormControl {
 
   hasErrorAndDirty(error: string): boolean {
     return hasErrorAnd('dirty', this, error);
+  }
+
+  clone(): FormControl<T> {
+    return cloneAbstractControl(this);
   }
 }

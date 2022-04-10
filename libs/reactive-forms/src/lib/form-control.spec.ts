@@ -190,6 +190,22 @@ describe('FormControl Functionality', () => {
     control.setErrors({ myError: 'So wrong' });
     expect(spy).toHaveBeenCalledWith({ myError: 'So wrong' });
   });
+
+  it('should clone', () => {
+    const control = new FormControl(1, {
+      asyncValidators: [async () => null],
+      updateOn: 'blur',
+      validators: [Validators.required],
+    });
+    const clone = control.clone();
+    expect(clone).not.toEqual(control);
+    expect(clone.value).toEqual(control.value);
+    expect(clone.asyncValidator).toEqual(control.asyncValidator);
+    expect(clone.updateOn).toEqual(control.updateOn);
+    expect(clone.validator).toEqual(control.validator);
+    clone.patchValue(2);
+    expect(clone.value).not.toEqual(control.value);
+  });
 });
 
 describe('FormControl Types', () => {

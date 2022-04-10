@@ -6,6 +6,7 @@ import {
 import { isObservable, Observable, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
 import {
+  cloneAbstractControl,
   controlDisabledWhile,
   controlEnabledWhile,
   controlErrorChanges$,
@@ -243,6 +244,10 @@ export class FormGroup<T extends Record<string, any>> extends NgFormGroup {
     path?: Parameters<AbstractControl['hasError']>[1]
   ): boolean {
     return hasErrorAnd('dirty', this, error, path);
+  }
+
+  clone(): FormGroup<T> {
+    return cloneAbstractControl(this);
   }
 }
 
