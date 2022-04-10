@@ -16,9 +16,10 @@ import {
   removeError,
   hasErrorAnd,
   controlErrorChanges$,
+  controlName,
+  controlPath,
 } from './core';
 import { BoxedValue } from './types';
-
 
 export class FormControl<T> extends NgFormControl {
   readonly value!: T;
@@ -49,6 +50,14 @@ export class FormControl<T> extends NgFormControl {
     asyncValidator?: ConstructorParameters<typeof NgFormControl>[2]
   ) {
     super(formState, validatorOrOpts, asyncValidator);
+  }
+
+  get name() {
+    return controlName(this);
+  }
+
+  get path() {
+    return controlPath(this);
   }
 
   setValue(

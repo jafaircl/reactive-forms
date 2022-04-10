@@ -18,15 +18,17 @@ import {
   disableControl,
   enableControl,
   markAllDirty,
+  controlName,
+  controlPath,
 } from './core';
 import { DeepPartial } from './types';
 
 export class FormArray<
   T,
   Control extends AbstractControl = T extends Record<any, any>
-  ? FormGroup<ControlsOf<T>>
-  : FormControl<T>
-  > extends NgFormArray {
+    ? FormGroup<ControlsOf<T>>
+    : FormControl<T>
+> extends NgFormArray {
   readonly value!: T[];
   readonly valueChanges!: Observable<T[]>;
 
@@ -55,6 +57,14 @@ export class FormArray<
     asyncValidator?: ConstructorParameters<typeof NgFormArray>[2]
   ) {
     super(controls, validatorOrOpts, asyncValidator);
+  }
+
+  get name() {
+    return controlName(this);
+  }
+
+  get path() {
+    return controlPath(this);
   }
 
   select<R>(mapFn: (state: T[]) => R): Observable<R> {

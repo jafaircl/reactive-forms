@@ -216,6 +216,25 @@ describe('FormArray Functionality', () => {
     expect(spy).toHaveBeenCalledWith('DISABLED');
   });
 
+  it('should name', () => {
+    const control = createArray();
+    expect(control.name).toEqual(null);
+    new FormGroup({ test: control });
+    expect(control.name).toEqual('test');
+    new FormArray([control]);
+    expect(control.name).toEqual('0');
+  });
+
+  it('should path', () => {
+    const control = createArray();
+    expect(control.path).toEqual(null);
+    new FormGroup({ test: control });
+    expect(control.path).toEqual('test');
+    const formGroup = new FormGroup({ test: new FormArray([control]) });
+    expect(control.path).toEqual('test.0');
+    expect(formGroup.get('test.0')).toStrictEqual(control);
+  });
+
   it('should select$', () => {
     const control = createArray();
     const spy = jest.fn();

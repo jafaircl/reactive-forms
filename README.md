@@ -243,6 +243,38 @@ const group = new FormGroup({
 group.select(state => state.name).subscribe(name => ...)
 ```
 
+### `name`
+
+If the control is a member of a `FormGroup` or `FormArray`, returns the name for the control.
+
+```ts
+import { FormControl, FormGroup } from '@ngneat/reactive-forms';
+
+const control = new FormControl('')
+const group = new FormGroup({
+  name: control
+})
+group.name // null
+control.name // 'name'
+```
+
+### `path`
+
+If the control is a member of a `FormGroup` or `FormArray`, returns the path for the control.
+
+```ts
+import { FormControl, FormGroup } from '@ngneat/reactive-forms';
+
+const control = new FormControl('')
+const group = new FormGroup({
+  name: new FormGroup({
+    first: control
+  })
+})
+group.name // null
+control.name // 'name.first'
+```
+
 ## Control Methods
 
 ### `setValue()`

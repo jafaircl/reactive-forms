@@ -2,7 +2,9 @@ import { Validators } from '@angular/forms';
 import { expectTypeOf } from 'expect-type';
 import { Observable, of, Subject, Subscription } from 'rxjs';
 import { ControlState } from './core';
+import { FormArray } from './form-array';
 import { FormControl } from './form-control';
+import { FormGroup } from './form-group';
 
 describe('FormControl Functionality', () => {
   it('should valueChanges$', () => {
@@ -43,6 +45,25 @@ describe('FormControl Functionality', () => {
     expect(spy).toHaveBeenCalledWith('VALID');
     control.disable();
     expect(spy).toHaveBeenCalledWith('DISABLED');
+  });
+
+  it('should name', () => {
+    const control = new FormControl();
+    expect(control.name).toEqual(null);
+    new FormGroup({ test: control });
+    expect(control.name).toEqual('test');
+    new FormArray([control]);
+    expect(control.name).toEqual('0');
+  });
+
+  it('should path', () => {
+    const control = new FormControl();
+    expect(control.path).toEqual(null);
+    new FormGroup({ test: control });
+    expect(control.path).toEqual('test');
+    const formGroup = new FormGroup({ test: new FormArray([control]) });
+    expect(control.path).toEqual('test.0');
+    expect(formGroup.get('test.0')).toStrictEqual(control);
   });
 
   it('should setValue', () => {

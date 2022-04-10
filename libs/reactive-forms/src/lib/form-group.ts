@@ -9,6 +9,8 @@ import {
   controlDisabledWhile,
   controlEnabledWhile,
   controlErrorChanges$,
+  controlName,
+  controlPath,
   controlStatus$,
   controlValueChanges$,
   disableControl,
@@ -50,6 +52,14 @@ export class FormGroup<T extends Record<string, any>> extends NgFormGroup {
     asyncValidator?: ConstructorParameters<typeof NgFormGroup>[2]
   ) {
     super(controls, validatorOrOpts, asyncValidator);
+  }
+
+  get name() {
+    return controlName(this);
+  }
+
+  get path() {
+    return controlPath(this);
   }
 
   select<R>(mapFn: (state: ValuesOf<T>) => R): Observable<R> {

@@ -77,6 +77,25 @@ describe('FormGroup Functionality', () => {
     expect(spy).toHaveBeenCalledWith('DISABLED');
   });
 
+  it('should name', () => {
+    const control = new FormGroup({});
+    expect(control.name).toEqual(null);
+    new FormGroup({ test: control });
+    expect(control.name).toEqual('test');
+    new FormArray([control]);
+    expect(control.name).toEqual('0');
+  });
+
+  it('should path', () => {
+    const control = new FormGroup({});
+    expect(control.path).toEqual(null);
+    new FormGroup({ test: control });
+    expect(control.path).toEqual('test');
+    const formGroup = new FormGroup({ test: new FormArray([control]) });
+    expect(control.path).toEqual('test.0');
+    expect(formGroup.get('test.0')).toStrictEqual(control);
+  });
+
   it('should select$', () => {
     const control = createGroup();
     const spy = jest.fn();
@@ -198,7 +217,9 @@ describe('FormGroup Functionality', () => {
 
   function areAllAllChildrenDirty(control: AbstractControl) {
     expect(control.dirty).toBe(true);
-    (control as any)._forEachChild((control: AbstractControl) => areAllAllChildrenDirty(control));
+    (control as any)._forEachChild((control: AbstractControl) =>
+      areAllAllChildrenDirty(control)
+    );
   }
 
   it('should markAllAsDirty', () => {
@@ -467,22 +488,19 @@ describe('FormGroup Types', () => {
   });
 });
 
-
-
 describe('ControlsOf', () => {
-
   it('should infer the type', () => {
     interface Foo {
       str: string;
       nested: {
         one: string;
-        two: number,
+        two: number;
         deep: {
           id: number;
-          arr: string[]
-        }
-      },
-      arr: string[]
+          arr: string[];
+        };
+      };
+      arr: string[];
     }
 
     const group = new FormGroup<ControlsOf<Foo>>({
@@ -492,21 +510,24 @@ describe('ControlsOf', () => {
         two: new FormControl(),
         deep: new FormGroup({
           id: new FormControl(1),
-          arr: new FormArray([])
-        })
+          arr: new FormArray([]),
+        }),
       }),
-      arr: new FormArray([])
+      arr: new FormArray([]),
     });
 
     expectTypeOf(group.value).toEqualTypeOf<Foo>();
 
     expectTypeOf(group.get('str')).toEqualTypeOf<FormControl<string>>();
-    expectTypeOf(group.get('nested')).toEqualTypeOf<FormGroup<ControlsOf<Foo['nested']>>>();
-    expectTypeOf(group.get('arr')).toEqualTypeOf<FormArray<string, FormControl<string>>>();
+    expectTypeOf(group.get('nested')).toEqualTypeOf<
+      FormGroup<ControlsOf<Foo['nested']>>
+    >();
+    expectTypeOf(group.get('arr')).toEqualTypeOf<
+      FormArray<string, FormControl<string>>
+    >();
 
     expectTypeOf(group.get('nested').value).toEqualTypeOf<Foo['nested']>();
     expectTypeOf(group.get('arr').value).toEqualTypeOf<Foo['arr']>();
-
 
     new FormGroup<ControlsOf<Foo>>({
       // @ts-expect-error - should be typed
@@ -514,33 +535,31 @@ describe('ControlsOf', () => {
       // @ts-expect-error - should be typed
       nested: new FormGroup({
         // one: new FormControl(''),
-        two: new FormControl()
+        two: new FormControl(),
       }),
       // @ts-expect-error - should be typed
-      arr: new FormArray([new FormControl(1)])
-    })
-  })
+      arr: new FormArray([new FormControl(1)]),
+    });
+  });
 
   it('should allow FormControls as objects or arrays', () => {
-
     interface Bar {
       str: string;
       controlGroup: FormControl<{
         one: string;
-        two: number
-      }>,
-      controlArr: FormControl<string[]>,
+        two: number;
+      }>;
+      controlArr: FormControl<string[]>;
       group: {
         id: string;
         deep: {
           id: number;
-          arr: FormControl<string[]>
-        }
-      }
-      arr: string[],
-      arrGroup: Array<{ name: string, count: number }>;
+          arr: FormControl<string[]>;
+        };
+      };
+      arr: string[];
+      arrGroup: Array<{ name: string; count: number }>;
     }
-
 
     const group = new FormGroup<ControlsOf<Bar>>({
       str: new FormControl(''),
@@ -550,11 +569,11 @@ describe('ControlsOf', () => {
         id: new FormControl(),
         deep: new FormGroup({
           id: new FormControl(),
-          arr: new FormControl([])
-        })
+          arr: new FormControl([]),
+        }),
       }),
       arr: new FormArray([]),
-      arrGroup: new FormArray([])
+      arrGroup: new FormArray([]),
     });
 
     expectTypeOf(group.value).toEqualTypeOf<ValuesOf<ControlsOf<Bar>>>();
@@ -562,7 +581,10 @@ describe('ControlsOf', () => {
     new FormGroup<ControlsOf<Bar>>({
       str: new FormControl(''),
       // @ts-expect-error - should be FormControl
-      controlGroup: new FormGroup({ one: new FormControl(''), two: new FormControl() }),
+      controlGroup: new FormGroup({
+        one: new FormControl(''),
+        two: new FormControl(),
+      }),
       // @ts-expect-error - should be FormControl
       controlArr: new FormArray([]),
       // @ts-expect-error - should be FormGroup
@@ -570,11 +592,9 @@ describe('ControlsOf', () => {
       // @ts-expect-error - should be FormArray
       arr: new FormControl([]),
       // @ts-expect-error - should be FormArray
-      arrGroup: new FormControl([])
+      arrGroup: new FormControl([]),
     });
-
-  })
-
+  });
 
   it('should work with optional fields', () => {
     type Foo = {
@@ -583,9 +603,9 @@ describe('ControlsOf', () => {
       baz: null | string;
       arr?: string[];
       nested: {
-        id: string
-      }
-    }
+        id: string;
+      };
+    };
 
     const group = new FormGroup<ControlsOf<Foo>>({
       foo: new FormControl(''),
@@ -593,19 +613,20 @@ describe('ControlsOf', () => {
       baz: new FormControl(null),
       arr: new FormArray([]),
       nested: new FormGroup({
-        id: new FormControl('')
-      })
-    })
+        id: new FormControl(''),
+      }),
+    });
 
     // @ts-expect-error - should be a string
     group.get('name')?.patchValue(1);
 
-    expectTypeOf(group.get('name')).toEqualTypeOf<FormControl<string | undefined> | undefined>();
+    expectTypeOf(group.get('name')).toEqualTypeOf<
+      FormControl<string | undefined> | undefined
+    >();
 
     expectTypeOf(group.value.name).toEqualTypeOf<string | undefined>();
     expectTypeOf(group.value.arr).toEqualTypeOf<string[] | undefined>();
     expectTypeOf(group.value.baz).toEqualTypeOf<string | null>();
     expectTypeOf(group.value.nested).toEqualTypeOf<{ id: string }>();
-  })
-
+  });
 });

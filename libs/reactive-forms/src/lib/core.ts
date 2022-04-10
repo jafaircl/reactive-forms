@@ -134,5 +134,33 @@ export function controlErrorChanges$(
 export function markAllDirty(control: AbstractControl): void {
   control.markAsDirty({ onlySelf: true });
 
-  (control as any)._forEachChild((control: any) => control.markAllAsDirty?.() || control.markAsDirty({ onlySelf: true }));
+  (control as any)._forEachChild(
+    (control: any) =>
+      control.markAllAsDirty?.() || control.markAsDirty({ onlySelf: true })
+  );
+}
+
+export function controlName(control: AbstractControl) {
+  if (control.parent) {
+    const entries = Object.entries(control.parent.controls);
+    for (const [childControlKey, childControl] of entries) {
+      if (childControl === control) {
+        return childControlKey;
+      }
+    }
+  }
+  return null;
+}
+
+export function controlPath(control: AbstractControl) {
+  let path = controlName(control);
+  while (control.parent) {
+    control = control.parent;
+    const name = controlName(control);
+    if (!name) {
+      return path;
+    }
+    path = `${name}.${path}`;
+  }
+  return null;
 }
